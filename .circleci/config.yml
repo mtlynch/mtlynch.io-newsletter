@@ -1,0 +1,49 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: circleci/node:13.2.0-stretch
+    steps:
+      - checkout
+      - run:
+          name: Download npm packages
+          command: npm install
+  deploy:
+    docker:
+      - image: google/cloud-sdk:274.0.1
+    environment:
+      GCLOUD_PROJECT: mtlynch-blog
+    steps:
+      - checkout
+      - run:
+          name: Retrieve environment variables from CircleCI
+          command: |
+            echo "env_variables:" > env_variables.yaml && \
+            echo "  EMAIL_OCTOPUS_API_KEY: '${EMAIL_OCTOPUS_API_KEY}'" >> env_variables.yaml
+      - run:
+          name: Retrieve GCP client secret from CircleCI
+          command: |
+            echo "$GCP_CLIENT_SECRET" | \
+              base64 --decode > "${HOME}/gcp-client-secret.json"
+      - run:
+          name: Authenticate gcloud
+          command: |
+            gcloud auth activate-service-account \
+              --key-file "${HOME}/gcp-client-secret.json"
+      - run:
+          name: Configure gcloud project
+          command: gcloud config set project "${GCLOUD_PROJECT}"
+      - run:
+          name: Deploy to AppEngine
+          command: gcloud --quiet app deploy --promote app.yaml
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
