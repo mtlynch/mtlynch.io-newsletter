@@ -4,10 +4,17 @@ const express = require('express');
 const app = express();
 const https = require('https')
 
+function validateUserId(userId) {
+  // Deliberately don't accept user IDs in the form of md5(email) because then
+  // an attacker could modify anyone's settings just by knowing their email
+  // address.
+  return userId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+}
+
 function updateUser(userId, topic) {
   return new Promise((resolve, reject) => {
-    if (!userId) {
-      reject(new Error('userId must be set'));
+    if (!userId || !validateUserId(userId)) {
+      reject(new Error('invalid userId parameter'));
       return;
     }
     if (!topic) {
