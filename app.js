@@ -1,8 +1,12 @@
 "use strict";
 
 const express = require("express");
+const mustacheExpress = require("mustache-express");
 const app = express();
 const https = require("https");
+
+app.engine("mustache", mustacheExpress());
+app.set("view engine", "mustache");
 
 function validateUserId(userId) {
   // Deliberately don't accept user IDs in the form of md5(email) because then
@@ -88,7 +92,7 @@ app.use("/css", express.static(__dirname + "/node_modules/bootstrap/dist/css"));
 app.use("/js", express.static(__dirname + "/node_modules/bootstrap/dist/js"));
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.render("home", { userId: req.query.userId });
 });
 
 if (!process.env.EMAIL_OCTOPUS_API_KEY) {

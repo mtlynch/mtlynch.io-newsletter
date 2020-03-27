@@ -10,8 +10,11 @@
       <h1>Update your subscription</h1>
 
       <p>Below, you can change your subscription preferences for mtlynch.io.</p>
+      <p>Your userId is {{ userId }}</p>
       <form action="/update">
-        <input type="submit" value="Update" />
+        <input type="hidden" name="user-id" value="{{ userId }}" />
+        <input type="text" name="topics" />
+        <input class="btn btn-primary" type="submit" value="Update" />
       </form>
     </div>
 
