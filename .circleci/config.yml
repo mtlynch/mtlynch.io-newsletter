@@ -9,8 +9,8 @@ jobs:
           name: Download npm packages
           command: npm install
       - run:
-        name: Check JavaScript formatting
-        command: npm run check-format
+          name: Check JavaScript formatting
+          command: npm run check-format
   deploy:
     docker:
       - image: google/cloud-sdk:274.0.1
