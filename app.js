@@ -84,11 +84,11 @@ app.get("/update", (req, res) => {
     });
 });
 
+app.use("/css", express.static(__dirname + "/node_modules/bootstrap/dist/css"));
+app.use("/js", express.static(__dirname + "/node_modules/bootstrap/dist/js"));
+
 app.get("/", (req, res) => {
-  res
-    .status(200)
-    .send("Send your update to /update")
-    .end();
+  res.sendFile(__dirname + "/index.html");
 });
 
 if (!process.env.EMAIL_OCTOPUS_API_KEY) {
