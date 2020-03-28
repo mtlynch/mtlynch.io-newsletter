@@ -12,10 +12,11 @@ const app = express();
 app.engine("mustache", mustacheExpress());
 app.set("view engine", "mustache");
 
-// TODO: Make this a POST
-app.get("/update", (req, res) => {
+app.use(express.urlencoded({ extended: false }));
+
+app.post("/update", (req, res) => {
   emailOctopus
-    .updateUserTopic(req.query.userId, req.query.topics)
+    .updateUserTopic(req.body.userId, req.body.topics)
     .then(() => {
       res.render("success");
     })
@@ -24,12 +25,15 @@ app.get("/update", (req, res) => {
     });
 });
 
-// TODO: Make this a POST
-app.get("/unsubscribe", (req, res) => {
-  res
-    .status(501)
-    .send("This will be implemented soon!")
-    .end();
+app.post("/unsubscribe", (req, res) => {
+  emailOctopus
+    .unsubscribeUser(req.body.userId)
+    .then(() => {
+      res.render("success");
+    })
+    .catch(err => {
+      res.render("error", { error: err });
+    });
 });
 
 app.use(

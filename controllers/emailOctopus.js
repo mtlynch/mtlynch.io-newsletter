@@ -10,31 +10,18 @@ function validateUserId(userId) {
   );
 }
 
-// Updates the topic field of a subscriber with the given contact ID.
-function updateUserTopic(userId, topic) {
+function updateContact(userId, data) {
   return new Promise((resolve, reject) => {
     if (!userId || !validateUserId(userId)) {
       reject(new Error("invalid userId parameter"));
       return;
     }
-    if (!topic) {
-      reject(new Error("topic must be set"));
-      return;
-    }
-    const data = JSON.stringify({
-      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
-      fields: {
-        Topics: topic
-      }
-    });
 
     const listId = process.env.EMAIL_OCTOPUS_LIST_ID;
-    const path = `/api/1.5/lists/${listId}/contacts/${userId}`;
-
     const options = {
       hostname: "emailoctopus.com",
       port: 443,
-      path: path,
+      path: `/api/1.5/lists/${listId}/contacts/${userId}`,
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -66,6 +53,42 @@ function updateUserTopic(userId, topic) {
   });
 }
 
+// Updates the topic field of a subscriber with the given contact ID.
+function updateUserTopic(userId, topic) {
+  return new Promise((resolve, reject) => {
+    if (!topic) {
+      reject(new Error("topic must be set"));
+      return;
+    }
+    const data = JSON.stringify({
+      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
+      fields: {
+        Topics: topic
+      },
+      status: "SUBSCRIBED"
+    });
+
+    updateContact(userId, data)
+      .then(result => resolve(result))
+      .catch(err => reject(err));
+  });
+}
+
+// Sets the user with the given ID to unsubscribed.
+function unsubscribeUser(userId) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({
+      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
+      status: "UNSUBSCRIBED"
+    });
+
+    updateContact(userId, data)
+      .then(result => resolve(result))
+      .catch(err => reject(err));
+  });
+}
+
 module.exports = {
+  unsubscribeUser,
   updateUserTopic
 };
