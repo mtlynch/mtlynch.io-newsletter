@@ -3,77 +3,15 @@
 const express = require("express");
 const mustacheExpress = require("mustache-express");
 const app = express();
-const https = require("https");
+const emailOctopus = require("./controllers/emailOctopus");
 
 app.engine("mustache", mustacheExpress());
 app.set("view engine", "mustache");
 
-function validateUserId(userId) {
-  // Deliberately don't accept user IDs in the form of md5(email) because then
-  // an attacker could modify anyone's settings just by knowing their email
-  // address.
-  return userId.match(
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-  );
-}
-
-function updateUser(userId, topic) {
-  return new Promise((resolve, reject) => {
-    if (!userId || !validateUserId(userId)) {
-      reject(new Error("invalid userId parameter"));
-      return;
-    }
-    if (!topic) {
-      reject(new Error("topic must be set"));
-      return;
-    }
-    const data = JSON.stringify({
-      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
-      fields: {
-        Topics: topic
-      }
-    });
-
-    const listId = process.env.EMAIL_OCTOPUS_LIST_ID;
-    const path = `/api/1.5/lists/${listId}/contacts/${userId}`;
-
-    const options = {
-      hostname: "emailoctopus.com",
-      port: 443,
-      path: path,
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Length": data.length
-      }
-    };
-
-    const req = https.request(options, res => {
-      if (res.statusCode < 200 || res.statusCode > 299) {
-        reject(
-          new Error(
-            "Failed to complete request, status code: " + res.statusCode
-          )
-        );
-      }
-
-      const body = [];
-      res.on("data", d => body.push(d));
-      res.on("end", () => resolve(body.join("")));
-    });
-
-    req.on("error", err => {
-      reject(err);
-    });
-
-    req.write(data);
-    req.end();
-  });
-}
-
 // TODO: Make this a POST
 app.get("/update", (req, res) => {
-  updateUser(req.query.userId, req.query.topics)
+  emailOctopus
+    .updateUserTopic(req.query.userId, req.query.topics)
     .then(response => {
       res
         .status(200)
@@ -88,8 +26,23 @@ app.get("/update", (req, res) => {
     });
 });
 
-app.use("/css", express.static(__dirname + "/node_modules/bootstrap/dist/css"));
-app.use("/js", express.static(__dirname + "/node_modules/bootstrap/dist/js"));
+// TODO: Make this a POST
+app.get("/unsubscribe", (req, res) => {
+  res
+    .status(501)
+    .send("This will be implemented soon!")
+    .end();
+});
+
+app.use(
+  "/vendor/css",
+  express.static(__dirname + "/node_modules/bootstrap/dist/css")
+);
+app.use("/css", express.static(__dirname + "/css"));
+app.use(
+  "/vendor/js",
+  express.static(__dirname + "/node_modules/bootstrap/dist/js")
+);
 
 app.get("/", (req, res) => {
   res.render("home", { userId: req.query.userId });
