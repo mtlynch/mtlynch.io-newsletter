@@ -1,0 +1,9 @@
+.radio-btns {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.2em;
+}
+
+.radio-btns label {
+  margin-left: 0.5rem;
+}
