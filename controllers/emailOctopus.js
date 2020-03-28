@@ -46,7 +46,8 @@ function updateUserTopic(userId, topic) {
       if (res.statusCode < 200 || res.statusCode > 299) {
         reject(
           new Error(
-            "Failed to complete request, status code: " + res.statusCode
+            "Failed to complete request - " +
+              (res.statusMessage ? res.statusMessage : res.statusCode)
           )
         );
       }

@@ -16,17 +16,11 @@ app.set("view engine", "mustache");
 app.get("/update", (req, res) => {
   emailOctopus
     .updateUserTopic(req.query.userId, req.query.topics)
-    .then(response => {
-      res
-        .status(200)
-        .send("Update succeeded!")
-        .end();
+    .then(() => {
+      res.render("success");
     })
     .catch(err => {
-      res
-        .status(500)
-        .send("Failed: " + err)
-        .end();
+      res.render("error", { error: err });
     });
 });
 

@@ -11,7 +11,8 @@
       <h1 class="my-3">Update your subscription</h1>
       {{#userId}}
       <p>Below, you can change your subscription preferences for mtlynch.io.</p>
-      <p>Your userId is {{ userId }}</p>
+
+      <p>I want to receive:</p>
       <form action="/update">
         <input type="hidden" name="userId" value="{{ userId }}" />
         <div class="radio-btns my-3">
@@ -22,7 +23,6 @@
               name="topics"
               value="all"
               autocomplete="off"
-              checked
             /><label for="all">
               All updates (blog posts, retrospectives, book reports)
             </label>

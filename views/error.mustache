@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>mtlynch.io subscription</title>
+    <link href="/vendor/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link href="/css/style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="my-3">Update failed</h1>
+
+      <div class="alert alert-danger" role="alert">
+        <p>We weren't able to apply your change.</p>
+
+        {{#error}}
+        <p>
+          <strong>{{ error }}</strong>
+        </p>
+        {{/error}}
+      </div>
+
+      <p>
+        Try going back and trying again or
+        <a href="mailto:michael@mtlynch.io">emailing me</a> to get it
+        straightened out.
+      </p>
+
+      <button class="btn btn-primary" onclick="history.back()">Back</button>
+    </div>
+
+    <script src="/vendor/js/bootstrap.js" type="text/javascript"></script>
+    <script src="/js/script.js" type="text/javascript"></script>
+  </body>
+</html>
