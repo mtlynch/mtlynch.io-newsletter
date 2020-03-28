@@ -2,9 +2,13 @@
 
 const express = require("express");
 const mustacheExpress = require("mustache-express");
-const app = express();
 const emailOctopus = require("./controllers/emailOctopus");
 
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
+const app = express();
 app.engine("mustache", mustacheExpress());
 app.set("view engine", "mustache");
 
