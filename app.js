@@ -29,10 +29,17 @@ app.post("/update", (req, res) => {
 
 app.options("/subscribe", cors());
 app.post("/subscribe", cors(), (req, res) => {
+  // The ninja field is a honeypot input that no humans should fill out.
   if (req.body.ninja) {
     console.log(
       `bot signup detected: email=${req.body.email}, ninja=${req.body.ninja}`
     );
+    // Send a dummy success message.
+    res
+      .status(200)
+      .json({ success: true })
+      .end();
+    return;
   }
   emailOctopus
     .subscribeUser(req.body.email, req.body.topic)
