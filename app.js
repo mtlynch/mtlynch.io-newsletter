@@ -1,6 +1,7 @@
 "use strict";
 
 const express = require("express");
+const cors = require("cors");
 const mustacheExpress = require("mustache-express");
 const emailOctopus = require("./controllers/emailOctopus");
 
@@ -13,6 +14,7 @@ app.engine("mustache", mustacheExpress());
 app.set("view engine", "mustache");
 
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 app.post("/update", (req, res) => {
   emailOctopus
@@ -22,6 +24,30 @@ app.post("/update", (req, res) => {
     })
     .catch(err => {
       res.render("error", { error: err });
+    });
+});
+
+app.options("/subscribe", cors());
+app.post("/subscribe", cors(), (req, res) => {
+  if (req.body.ninja) {
+    console.log(
+      `bot signup detected: email=${req.body.email}, ninja=${req.body.ninja}`
+    );
+  }
+  emailOctopus
+    .subscribeUser(req.body.email, req.body.topic)
+    .then(() => {
+      res
+        .status(200)
+        .json({ success: true })
+        .end();
+    })
+    .catch(err => {
+      console.log(err);
+      res
+        .status(500)
+        .json({ success: false, error: err })
+        .end();
     });
 });
 
