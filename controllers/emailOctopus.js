@@ -78,19 +78,11 @@ function updateUserTopic(userId, topic) {
   });
 }
 
-function subscribeUser(email, topic) {
+function subscribeUser(email) {
   return new Promise((resolve, reject) => {
-    if (!topic) {
-      reject(new Error("topic must be set"));
-      return;
-    }
-
     const data = JSON.stringify({
       api_key: process.env.EMAIL_OCTOPUS_API_KEY,
-      email_address: email,
-      fields: {
-        Topics: topic
-      }
+      email_address: email
     });
 
     const listId = process.env.EMAIL_OCTOPUS_LIST_ID;
