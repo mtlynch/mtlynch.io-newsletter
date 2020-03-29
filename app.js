@@ -42,7 +42,7 @@ app.post("/subscribe", cors(), (req, res) => {
     return;
   }
   emailOctopus
-    .subscribeUser(req.body.email, req.body.topic)
+    .subscribeUser(req.body.email)
     .then(() => {
       res
         .status(200)
