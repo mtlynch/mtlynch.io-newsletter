@@ -1,33 +1,26 @@
-const http = require("http");
 const https = require("https");
 
-const API_HOSTNAME = "emailoctopus.com";
+const API_HOSTNAME = "api.bigmailer.io";
 const API_PORT = 443;
 
-// Validates a Email Octopus User ID like "7d763008-6c82-11ea-a3d0-06b4694bee2a".
-function validateUserId(userId) {
-  // Deliberately don't accept user IDs in the form of md5(email) because then
-  // an attacker could modify anyone's settings just by knowing their email
-  // address.
-  return userId.match(
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-  );
-}
+/*const https = require("http");
+const API_HOSTNAME = "localhost";
+const API_PORT = 8085;*/
 
-function updateContact(userId, data) {
+function updateContact(email, data) {
   return new Promise((resolve, reject) => {
-    if (!userId || !validateUserId(userId)) {
-      reject(new Error("invalid userId parameter"));
+    if (!email) {
+      reject(new Error("email parameter is missing"));
       return;
     }
 
-    const listId = process.env.EMAIL_OCTOPUS_LIST_ID;
     const options = {
       hostname: API_HOSTNAME,
       port: API_PORT,
-      path: `/api/1.5/lists/${listId}/contacts/${userId}`,
-      method: "PUT",
+      path: `/v1/brands/${process.env.BIGMAILER_BRAND_ID}/contacts/${email}?field_values_op=replace`,
+      method: "POST",
       headers: {
+        "X-API-Key": process.env.BIGMAILER_API_KEY,
         "Content-Type": "application/json",
         "Content-Length": data.length
       }
@@ -58,21 +51,22 @@ function updateContact(userId, data) {
 }
 
 // Updates the topic field of a subscriber with the given contact ID.
-function updateUserTopic(userId, topic) {
+function updateUserTopic(email, topic) {
   return new Promise((resolve, reject) => {
     if (!topic) {
       reject(new Error("topic must be set"));
       return;
     }
     const data = JSON.stringify({
-      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
-      fields: {
-        Topics: topic
-      },
-      status: "SUBSCRIBED"
+      field_values: [
+        {
+          string: topic,
+          name: "topics"
+        }
+      ]
     });
 
-    updateContact(userId, data)
+    updateContact(email, data)
       .then(result => resolve(result))
       .catch(err => reject(err));
   });
@@ -86,29 +80,35 @@ function subscribeUser(email, topic) {
     }
 
     const data = JSON.stringify({
-      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
-      email_address: email,
-      fields: {
-        Topics: topic
-      }
+      api_key: process.env.BIGMAILER_API_KEY,
+      email: email,
+      field_values: [
+        {
+          string: topic,
+          name: "topics"
+        }
+      ],
+      list_ids: [process.env.BIGMAILER_LIST_ID]
     });
 
-    const listId = process.env.EMAIL_OCTOPUS_LIST_ID;
     const options = {
       hostname: API_HOSTNAME,
       port: API_PORT,
-      path: `/api/1.5/lists/${listId}/contacts`,
+      path: `/v1/brands/${process.env.BIGMAILER_BRAND_ID}/contacts`,
       method: "POST",
       headers: {
+        "X-API-Key": process.env.BIGMAILER_API_KEY,
         "Content-Type": "application/json",
         "Content-Length": data.length
       }
     };
 
     const req = https.request(options, res => {
-      if (res.statusCode == 409) {
+      if (res.statusCode == 422) {
         console.log(`duplicate signup from ${email}`);
       } else if (res.statusCode < 200 || res.statusCode > 299) {
+        console.log(res);
+        console.log(res.body);
         reject(
           new Error(
             "Failed to complete request - " +
@@ -132,14 +132,14 @@ function subscribeUser(email, topic) {
 }
 
 // Sets the user with the given ID to unsubscribed.
-function unsubscribeUser(userId) {
+function unsubscribeUser(email) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
-      api_key: process.env.EMAIL_OCTOPUS_API_KEY,
+      api_key: process.env.BIGMAILER_API_KEY,
       status: "UNSUBSCRIBED"
     });
 
-    updateContact(userId, data)
+    updateContact(email, data)
       .then(result => resolve(result))
       .catch(err => reject(err));
   });

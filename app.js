@@ -3,7 +3,7 @@
 const express = require("express");
 const cors = require("cors");
 const mustacheExpress = require("mustache-express");
-const emailOctopus = require("./controllers/emailOctopus");
+const bigmailer = require("./controllers/bigmailer");
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -17,8 +17,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.post("/update", (req, res) => {
-  emailOctopus
-    .updateUserTopic(req.body.userId, req.body.topics)
+  bigmailer
+    .updateUserTopic(req.body.email, req.body.topics)
     .then(() => {
       res.render("success");
     })
@@ -41,7 +41,7 @@ app.post("/subscribe", cors(), (req, res) => {
       .end();
     return;
   }
-  emailOctopus
+  bigmailer
     .subscribeUser(req.body.email, req.body.topic)
     .then(() => {
       res
@@ -50,16 +50,16 @@ app.post("/subscribe", cors(), (req, res) => {
         .end();
     })
     .catch(err => {
-      console.log(err);
+      console.log("catch err: ", err);
       res
         .status(500)
-        .json({ success: false, error: err })
+        .json({ success: false, error: err.toString() })
         .end();
     });
 });
 
 app.post("/unsubscribe", (req, res) => {
-  emailOctopus
+  bigmailer
     .unsubscribeUser(req.body.userId)
     .then(() => {
       res.render("success");
@@ -80,15 +80,15 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("home", { userId: req.query.userId });
+  res.render("home", { email: req.query.email });
 });
 
-if (!process.env.EMAIL_OCTOPUS_API_KEY) {
-  console.error("EMAIL_OCTOPUS_API_KEY environment variable is required");
+if (!process.env.BIGMAILER_API_KEY) {
+  console.error("BIGMAILER_API_KEY environment variable is required");
   process.exit();
 }
-if (!process.env.EMAIL_OCTOPUS_LIST_ID) {
-  console.error("EMAIL_OCTOPUS_LIST_ID environment variable is required");
+if (!process.env.BIGMAILER_LIST_ID) {
+  console.error("BIGMAILER_LIST_ID environment variable is required");
   process.exit();
 }
 

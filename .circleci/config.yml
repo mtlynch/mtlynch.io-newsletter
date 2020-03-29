@@ -22,8 +22,8 @@ jobs:
           name: Retrieve environment variables from CircleCI
           command: |
             echo "env_variables:" > env_variables.yaml && \
-            echo "  EMAIL_OCTOPUS_API_KEY: '${EMAIL_OCTOPUS_API_KEY}'" >> env_variables.yaml && \
-            echo "  EMAIL_OCTOPUS_LIST_ID: '${EMAIL_OCTOPUS_LIST_ID}'" >> env_variables.yaml
+            echo "  BIGMAILER_API_KEY: '${BIGMAILER_API_KEY}'" >> env_variables.yaml && \
+            echo "  BIGMAILER_LIST_ID: '${BIGMAILER_LIST_ID}'" >> env_variables.yaml
       - run:
           name: Retrieve GCP client secret from CircleCI
           command: |
