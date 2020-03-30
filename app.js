@@ -3,7 +3,7 @@
 const express = require("express");
 const cors = require("cors");
 const mustacheExpress = require("mustache-express");
-const emailOctopus = require("./controllers/emailOctopus");
+const mailchimp = require("./controllers/mailchimp");
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -17,8 +17,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.post("/update", (req, res) => {
-  emailOctopus
-    .updateUserTopic(req.body.userId, req.body.topics)
+  mailchimp
+    .updateUserTopic(req.body.email, req.body.topics)
     .then(() => {
       res.render("success");
     })
@@ -41,8 +41,8 @@ app.post("/subscribe", cors(), (req, res) => {
       .end();
     return;
   }
-  emailOctopus
-    .subscribeUser(req.body.email)
+  mailchimp
+    .subscribeUser(req.body.email, req.body.topics)
     .then(() => {
       res
         .status(200)
@@ -50,7 +50,6 @@ app.post("/subscribe", cors(), (req, res) => {
         .end();
     })
     .catch(err => {
-      console.log(err);
       res
         .status(500)
         .json({ success: false, error: err })
@@ -59,8 +58,8 @@ app.post("/subscribe", cors(), (req, res) => {
 });
 
 app.post("/unsubscribe", (req, res) => {
-  emailOctopus
-    .unsubscribeUser(req.body.userId)
+  mailchimp
+    .unsubscribeUser(req.body.email)
     .then(() => {
       res.render("success");
     })
@@ -80,15 +79,15 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("home", { userId: req.query.userId });
+  res.render("home", { email: req.query.email });
 });
 
-if (!process.env.EMAIL_OCTOPUS_API_KEY) {
-  console.error("EMAIL_OCTOPUS_API_KEY environment variable is required");
+if (!process.env.MAILCHIMP_API_KEY) {
+  console.error("MAILCHIMP_API_KEY environment variable is required");
   process.exit();
 }
-if (!process.env.EMAIL_OCTOPUS_LIST_ID) {
-  console.error("EMAIL_OCTOPUS_LIST_ID environment variable is required");
+if (!process.env.MAILCHIMP_LIST_ID) {
+  console.error("MAILCHIMP_LIST_ID environment variable is required");
   process.exit();
 }
 
