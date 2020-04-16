@@ -22,7 +22,12 @@ app.post("/update", (req, res) => {
     .then(() => {
       res.render("success");
     })
-    .catch(err => {
+    .catch((err) => {
+      console.log(
+        "failed to change subscription for user: ",
+        req.body.email,
+        err
+      );
       res.render("error", { error: err });
     });
 });
@@ -49,10 +54,11 @@ app.post("/subscribe", cors(), (req, res) => {
         .json({ success: true })
         .end();
     })
-    .catch(err => {
+    .catch((err) => {
+      console.log("failed to subscribe user: ", req.body.email, err);
       res
         .status(500)
-        .json({ success: false, error: err })
+        .json({ success: false, error: err.message })
         .end();
     });
 });
@@ -63,7 +69,8 @@ app.post("/unsubscribe", (req, res) => {
     .then(() => {
       res.render("success");
     })
-    .catch(err => {
+    .catch((err) => {
+      console.log("failed to unsubscribe user: ", req.body.email, err);
       res.render("error", { error: err });
     });
 });

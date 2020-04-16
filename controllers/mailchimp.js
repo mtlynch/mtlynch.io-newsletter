@@ -28,29 +28,34 @@ function sendRequest(method, path, data) {
           "Basic " +
           new Buffer.from("ignored:" + process.env.MAILCHIMP_API_KEY).toString(
             "base64"
-          )
-      }
+          ),
+      },
     };
-    const req = https.request(options, res => {
+    const req = https.request(options, (res) => {
       const responseChunks = [];
-      res.on("data", d => responseChunks.push(d));
+      res.on("data", (d) => responseChunks.push(d));
       res.on("end", () => {
         const body = responseChunks.join("");
         if (res.statusCode < 200 || res.statusCode > 299) {
+          console.log("mailchimp request failed", res);
           parsed = JSON.parse(body);
           if (parsed && parsed.detail) {
             message = parsed.detail;
           } else {
             message = res.statusMessage ? res.statusMessage : res.statusCode;
           }
-          reject(new Error("Failed to complete request - " + message));
+          reject(new Error(message));
           return;
         }
         resolve(body);
       });
     });
 
-    req.on("error", err => {
+    req.on("error", (err) => {
+      console.log("mailchimp request failed", err);
+      if (err.response && err.response.data && err.response.data.message) {
+        reject(err.response.data.message);
+      }
       reject(err);
     });
 
@@ -83,11 +88,11 @@ function updateUserTopic(email, topics) {
       "POST",
       `/3.0/lists/${process.env.MAILCHIMP_LIST_ID}/members/${subscriberHash}/tags`,
       {
-        tags
+        tags,
       }
     )
-      .then(result => resolve(result))
-      .catch(err => reject(err));
+      .then((result) => resolve(result))
+      .catch((err) => reject(err));
   });
 }
 
@@ -105,10 +110,17 @@ function subscribeUser(email, topics) {
     sendRequest("POST", `/3.0/lists/${process.env.MAILCHIMP_LIST_ID}/members`, {
       email_address: email,
       status: "pending",
-      tags: [topics]
+      tags: [topics],
     })
-      .then(result => resolve(result))
-      .catch(err => reject(err));
+      .then((result) => resolve(result))
+      .catch((err) => {
+        // Treat duplicate signups as non-errors.
+        if (err.toString().indexOf("is already a list member") >= 0) {
+          resolve(true);
+        } else {
+          reject(err);
+        }
+      });
   });
 }
 
@@ -124,16 +136,16 @@ function unsubscribeUser(email) {
       "PATCH",
       `/3.0/lists/${process.env.MAILCHIMP_LIST_ID}/members/${subscriberHash}`,
       {
-        status: "unsubscribed"
+        status: "unsubscribed",
       }
     )
-      .then(result => resolve(result))
-      .catch(err => reject(err));
+      .then((result) => resolve(result))
+      .catch((err) => reject(err));
   });
 }
 
 module.exports = {
   subscribeUser,
   unsubscribeUser,
-  updateUserTopic
+  updateUserTopic,
 };
