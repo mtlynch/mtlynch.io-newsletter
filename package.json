@@ -12,7 +12,8 @@
   },
   "scripts": {
     "serve": "node app.js",
-    "check-format": "prettier --check './*.js'"
+    "check-format": "prettier --check './**/*.js'",
+    "format": "prettier --write './**/*.js'"
   },
   "dependencies": {
     "bootstrap": "^4.4.1",
