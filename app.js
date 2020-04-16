@@ -23,6 +23,11 @@ app.post("/update", (req, res) => {
       res.render("success");
     })
     .catch(err => {
+      console.log(
+        "failed to change subscription for user: ",
+        req.body.email,
+        err
+      );
       res.render("error", { error: err });
     });
 });
@@ -50,9 +55,10 @@ app.post("/subscribe", cors(), (req, res) => {
         .end();
     })
     .catch(err => {
+      console.log("failed to subscribe user: ", req.body.email, err);
       res
         .status(500)
-        .json({ success: false, error: err })
+        .json({ success: false, error: err.message })
         .end();
     });
 });
@@ -64,6 +70,7 @@ app.post("/unsubscribe", (req, res) => {
       res.render("success");
     })
     .catch(err => {
+      console.log("failed to unsubscribe user: ", req.body.email, err);
       res.render("error", { error: err });
     });
 });

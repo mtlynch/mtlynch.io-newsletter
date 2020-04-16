@@ -37,13 +37,14 @@ function sendRequest(method, path, data) {
       res.on("end", () => {
         const body = responseChunks.join("");
         if (res.statusCode < 200 || res.statusCode > 299) {
+          console.log("mailchimp request failed", res);
           parsed = JSON.parse(body);
           if (parsed && parsed.detail) {
             message = parsed.detail;
           } else {
             message = res.statusMessage ? res.statusMessage : res.statusCode;
           }
-          reject(new Error("Failed to complete request - " + message));
+          reject(new Error(message));
           return;
         }
         resolve(body);
@@ -51,6 +52,10 @@ function sendRequest(method, path, data) {
     });
 
     req.on("error", err => {
+      console.log("mailchimp request failed", err);
+      if (err.response && err.response.data && err.response.data.message) {
+        reject(err.response.data.message);
+      }
       reject(err);
     });
 
@@ -108,7 +113,14 @@ function subscribeUser(email, topics) {
       tags: [topics]
     })
       .then(result => resolve(result))
-      .catch(err => reject(err));
+      .catch(err => {
+        // Treat duplicate signups as non-errors.
+        if (err.toString().indexOf("is already a list member") >= 0) {
+          resolve(true);
+        } else {
+          reject(err);
+        }
+      });
   });
 }
 
