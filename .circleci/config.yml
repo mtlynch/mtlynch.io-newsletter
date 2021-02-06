@@ -13,7 +13,7 @@ jobs:
           command: npm run check-format
   deploy:
     docker:
-      - image: google/cloud-sdk:274.0.1
+      - image: google/cloud-sdk:326.0.0
     environment:
       GCLOUD_PROJECT: mtlynch-blog
     steps:
