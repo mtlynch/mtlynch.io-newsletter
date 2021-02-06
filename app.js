@@ -63,13 +63,17 @@ app.post("/unsubscribe", (req, res) => {
 });
 
 app.use(
-  "/vendor/css",
-  express.static(__dirname + "/node_modules/bootstrap/dist/css")
+  "/vendor/css/bootstrap.css",
+  express.static(__dirname + "/node_modules/bootstrap/dist/css/bootstrap.css")
 );
 app.use("/css", express.static(__dirname + "/css"));
 app.use(
-  "/vendor/js",
-  express.static(__dirname + "/node_modules/bootstrap/dist/js")
+  "/vendor/js/jquery.js",
+  express.static(__dirname + "/node_modules/jquery/dist/jquery.js")
+);
+app.use(
+  "/vendor/js/bootstrap.js",
+  express.static(__dirname + "/node_modules/bootstrap/dist/js/bootstrap.js")
 );
 
 app.get("/", (req, res) => {
