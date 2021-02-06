@@ -9,26 +9,18 @@
   <body>
     <div class="container">
       <h1 class="my-3">Update your subscription</h1>
+      {{#userId}}
       <p>Below, you can change your subscription preferences for mtlynch.io.</p>
 
+      <p>I want to receive:</p>
       <form action="/update" method="post">
-        {{#email}}
-        <p>
-          <strong>{{ email }}</strong>
-        </p>
-        <input type="hidden" name="email" value="{{ email }}" />
-        {{/email}}
-        {{^email}}
-        <input type="email" name="email" placeholder="Email Address" />
-        {{/email}}
-
-        <p>I want to receive:</p>
+        <input type="hidden" name="userId" value="{{ userId }}" />
         <div class="radio-btns my-3">
           <div class="container">
             <input
               type="radio"
               id="all"
-              name="topics"
+              name="topic"
               value="all"
               autocomplete="off"
             /><label for="all">
@@ -39,7 +31,7 @@
             <input
               type="radio"
               id="blog"
-              name="topics"
+              name="topic"
               value="blog"
               autocomplete="off"
             /><label for="blog">
@@ -47,7 +39,7 @@
             </label>
           </div>
           <div class="container">
-            <input type="radio" id="retrospectives" name="topics"
+            <input type="radio" id="retrospectives" name="topic"
             value="retrospectives" autocomplete="off" / ><label
               for="retrospectives"
             >
@@ -55,7 +47,7 @@
             </label>
           </div>
           <div class="container">
-            <input type="radio" id="book-reports" name="topics"
+            <input type="radio" id="book-reports" name="topic"
             value="book-reports" autocomplete="off" / ><label
               for="book-reports"
             >
@@ -66,13 +58,24 @@
         <input class="btn btn-primary" type="submit" value="Update" />
       </form>
       <form action="/unsubscribe" method="post">
-        <input type="hidden" name="email" value="{{ email }}" />
+        <input type="hidden" name="userId" value="{{ userId }}" />
         <input
           class="btn btn-danger mt-3"
           type="submit"
           value="Unsubscribe from everything"
         />
       </form>
+      {{/userId}}
+      {{^userId}}
+      <div class="alert alert-warning" role="alert">
+        <p>Uh oh. We couldn't find your user ID.</p>
+
+        <p>
+          Try clicking the link in a recent email from mtlynch.io or email
+          <a href="mailto:michael@mtlynch.io">michael@mtlynch.io</a>.
+        </p>
+      </div>
+      {{/userId}}
     </div>
 
     <script src="/vendor/js/bootstrap.js" type="text/javascript"></script>

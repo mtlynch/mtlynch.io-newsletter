@@ -8,6 +8,8 @@ A tiny web application that allows mtlynch.io blog subscribers to update their s
 
 ## To run
 
+Create a `.env` file with settings for `EMAIL_OCTOPUS_API_KEY` and `EMAIL_OCTOPUS_LIST_ID`, then run:
+
 ```bash
 npm install
 npm run serve

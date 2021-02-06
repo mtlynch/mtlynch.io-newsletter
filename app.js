@@ -3,7 +3,7 @@
 const express = require("express");
 const cors = require("cors");
 const mustacheExpress = require("mustache-express");
-const mailchimp = require("./controllers/mailchimp");
+const emailOctopus = require("./controllers/emailOctopus");
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -17,17 +17,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.post("/update", (req, res) => {
-  mailchimp
-    .updateUserTopic(req.body.email, req.body.topics)
+  emailOctopus
+    .updateUserTopic(req.body.userId, req.body.topic)
     .then(() => {
       res.render("success");
     })
-    .catch(err => {
-      console.log(
-        "failed to change subscription for user: ",
-        req.body.email,
-        err
-      );
+    .catch((err) => {
+      console.log(`failed to update user: ${req.body.userId} - ${err}`);
       res.render("error", { error: err });
     });
 });
@@ -40,37 +36,28 @@ app.post("/subscribe", cors(), (req, res) => {
       `bot signup detected: email=${req.body.email}, ninja=${req.body.ninja}`
     );
     // Send a dummy success message.
-    res
-      .status(200)
-      .json({ success: true })
-      .end();
+    res.status(200).json({ success: true }).end();
     return;
   }
-  mailchimp
-    .subscribeUser(req.body.email, req.body.topics)
+  emailOctopus
+    .subscribeUser(req.body.email, req.body.topic)
     .then(() => {
-      res
-        .status(200)
-        .json({ success: true })
-        .end();
+      res.status(200).json({ success: true }).end();
     })
-    .catch(err => {
-      console.log("failed to subscribe user: ", req.body.email, err);
-      res
-        .status(500)
-        .json({ success: false, error: err.message })
-        .end();
+    .catch((err) => {
+      console.log(`failed to subscribe user: ${req.body.email} - ${err}`);
+      res.status(500).json({ success: false, error: err }).end();
     });
 });
 
 app.post("/unsubscribe", (req, res) => {
-  mailchimp
-    .unsubscribeUser(req.body.email)
+  emailOctopus
+    .unsubscribeUser(req.body.userId)
     .then(() => {
       res.render("success");
     })
-    .catch(err => {
-      console.log("failed to unsubscribe user: ", req.body.email, err);
+    .catch((err) => {
+      console.log(`failed to unsubscribe user: ${req.body.userId} - ${err}`);
       res.render("error", { error: err });
     });
 });
@@ -86,15 +73,15 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("home", { email: req.query.email });
+  res.render("home", { userId: req.query.userId });
 });
 
-if (!process.env.MAILCHIMP_API_KEY) {
-  console.error("MAILCHIMP_API_KEY environment variable is required");
+if (!process.env.EMAIL_OCTOPUS_API_KEY) {
+  console.error("EMAIL_OCTOPUS_API_KEY environment variable is required");
   process.exit();
 }
-if (!process.env.MAILCHIMP_LIST_ID) {
-  console.error("MAILCHIMP_LIST_ID environment variable is required");
+if (!process.env.EMAIL_OCTOPUS_LIST_ID) {
+  console.error("EMAIL_OCTOPUS_LIST_ID environment variable is required");
   process.exit();
 }
 
