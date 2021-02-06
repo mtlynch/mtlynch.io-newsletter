@@ -36,26 +36,17 @@ app.post("/subscribe", cors(), (req, res) => {
       `bot signup detected: email=${req.body.email}, ninja=${req.body.ninja}`
     );
     // Send a dummy success message.
-    res
-      .status(200)
-      .json({ success: true })
-      .end();
+    res.status(200).json({ success: true }).end();
     return;
   }
   emailOctopus
     .subscribeUser(req.body.email, req.body.topic)
     .then(() => {
-      res
-        .status(200)
-        .json({ success: true })
-        .end();
+      res.status(200).json({ success: true }).end();
     })
     .catch((err) => {
       console.log(`failed to subscribe user: ${req.body.email} - ${err}`);
-      res
-        .status(500)
-        .json({ success: false, error: err })
-        .end();
+      res.status(500).json({ success: false, error: err }).end();
     });
 });
 
