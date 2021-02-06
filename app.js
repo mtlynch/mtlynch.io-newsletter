@@ -39,8 +39,12 @@ app.post("/subscribe", cors(), (req, res) => {
     res.status(200).json({ success: true }).end();
     return;
   }
+  // For backwards compatibility when the field was called "topics."
+  // TODO: Remove after 2020-03-01.
+  const topic = req.body.topic ? req.body.topic : req.body.topics;
+
   emailOctopus
-    .subscribeUser(req.body.email, req.body.topic)
+    .subscribeUser(req.body.email, topic)
     .then(() => {
       res.status(200).json({ success: true }).end();
     })
