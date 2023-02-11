@@ -8,7 +8,7 @@
     "url": "https://github.com/mtlynch/mtlynch.io-newsletter.git"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "start": "node app.js",
